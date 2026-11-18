@@ -361,6 +361,7 @@ details.lvls summary::-webkit-details-marker{display:none}
     <div class="bar"><i id="sBar"></i></div>
     <div id="closedBox"></div>
     <div id="rescue"></div>
+    <div id="outTg"></div>
     <div id="todayMain"></div>
     <div class="card" style="margin-top:12px" id="missionCard">
       <div class="daynav"><button onclick="shiftDay(-1)">‹</button><div class="lab" id="dayLabel"></div><button onclick="shiftDay(1)">›</button></div>
@@ -861,6 +862,7 @@ function renderHoje(){
  }
  const wkEmpty=!closed()&&!Object.keys(S.week||{}).length&&!S.weekHide;
  if(wkEmpty)main+=`<div class="planbar" style="margin:12px 0 0;padding:13px 14px">📅 <span style="flex:1"><b>Monte sua semana em 1 minuto</b><br><span class="muted" style="font-size:13px">Quem decide antes quando e o quê, aparece mais.</span></span><button class="chip" style="flex:none" onclick="go('eu');openWeek(1)">Montar</button><button aria-label="Fechar" style="flex:none;color:var(--muted);font-size:18px;padding:0 2px;background:none" onclick="S.weekHide=1;save();renderHoje()">×</button></div>`;
+ document.getElementById('outTg').innerHTML=(!CS&&S.outHide!==today())?`<div class="rescue" style="background:linear-gradient(135deg,rgba(246,196,83,.16),rgba(246,196,83,.03));border-color:rgba(246,196,83,.4);margin-bottom:12px"><b>⚠️ Você abriu fora do Telegram</b>Aqui seu progresso fica salvo só neste navegador e pode se perder. Pra salvar na sua conta, abra pelo bot no Telegram. Ou faça um backup agora.<div style="display:flex;gap:8px;margin-top:10px"><button class="chip" onclick="openBackup()">Fazer backup</button><button class="chip" onclick="S.outHide=today();save();renderHoje()">Entendi</button></div></div>`:'';
  document.getElementById('todayMain').innerHTML=main;
  const mv=M[view-1],key=dateOf(view);
  document.getElementById('missionCard').style.display=(closed()||preSeason())?'none':'block';
