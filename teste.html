@@ -310,6 +310,17 @@ details.lvls summary::-webkit-details-marker{display:none}
 <canvas id="snow"></canvas>
 
 <!-- ============ ONBOARDING ============ -->
+<div class="ob" id="gate" style="display:none">
+  <div style="display:flex;justify-content:center;margin:18px 0 6px"><div class="mascot" id="gateFace" style="margin:0"></div></div>
+  <div class="lab" style="text-align:center">Temporada de Natal · Turma Fundadora</div>
+  <h1 style="margin-top:10px;text-align:center">Bem-vindo à turma. 🎄</h1>
+  <p style="text-align:center">Digite o <b>código da turma</b> que chegou no seu e-mail de compra.</p>
+  <input id="gateCode" placeholder="ex.: DP-XXXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-align:center;font-size:18px;letter-spacing:.08em;margin-top:6px">
+  <div id="gateErr" class="muted" style="text-align:center;font-size:13px;min-height:20px;margin-top:8px"></div>
+  <button class="btn" onclick="checkGate()">Entrar</button>
+  <p class="muted" style="font-size:12.5px;text-align:center;line-height:1.5;margin-top:14px">Não achou? Procure por "Kiwify" na sua caixa de entrada e no spam. Ainda não tem acesso? O link pra entrar na turma está no perfil @scoobymaromba.</p>
+</div>
+
 <div class="ob" id="ob" style="display:none">
   <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
   <div class="step on" data-s="0">
@@ -554,6 +565,9 @@ details.lvls summary::-webkit-details-marker{display:none}
 <script>
 /* ================== CONTEÚDO ================== */
 const DEV=true; /* versão de teste. Na versão dos clientes fica false */
+/* código da turma: a pessoa digita o código que vai no e-mail da Kiwify. Aqui fica só a 'impressão digital' dele */
+const GATE_HASH=2873887384;
+function gHash(s){s=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');let x=5381;for(const ch of s)x=(Math.imul(x,33)^ch.charCodeAt(0))>>>0;return x}
 const SEASON={theme:'natal',id:'natal-2026',startDate:'2026-12-01',joinUntil:7,next:'1º de janeiro',nextName:'Temporada de Verão',name:'Temporada de Natal',year:'2026',days:31,goal:24,founder:true};
 const WORKOUTS={
  A:{nome:'Treino A · Pernas e core',tempo:'~20 min, em casa',series:3,rest:60,ex:[['Agachamentos',15],['Afundos (cada perna)',10],['Polichinelos',20],['Prancha',null,30]]},
@@ -1055,6 +1069,13 @@ function renderEu(){
  document.getElementById('notesList').innerHTML=ns.length?ns.map(([k,v])=>`<div class="card" style="margin-bottom:8px;padding:13px 16px"><div class="lab">${fmt(k)}</div><div style="margin-top:4px;font-size:14.5px;line-height:1.5">${esc(v)}</div></div>`).join(''):'<p class="muted" style="font-size:14px;margin:0 2px">As notas das suas atividades aparecem aqui.</p>';
 }
 
+/* ================== CÓDIGO DA TURMA ================== */
+function openGate(){document.getElementById('gate').style.display='block';snow(true);const f=document.getElementById('gateFace');if(f&&ATAN.acolhendo)f.innerHTML=`<img src="${ATAN.acolhendo}" alt="Atan">`;
+ document.getElementById('gateCode').addEventListener('keydown',e=>{if(e.key==='Enter')checkGate()})}
+function checkGate(){const v=document.getElementById('gateCode').value;
+ if(gHash(v)===GATE_HASH){try{localStorage.setItem('dp_gate',String(GATE_HASH))}catch(_){};haptic('heavy');location.reload()}
+ else{document.getElementById('gateErr').innerHTML='<span style="color:#f2c94c">Código não confere. Confere no e-mail e tenta de novo.</span>';haptic()}}
+
 /* ================== MINHA SEMANA ================== */
 const WDAYS=[1,2,3,4,5,6,0],WD_S=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],WD_L=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 const PLANA=[['A','🏠','Treino A · pernas'],['B','🏠','Treino B · superior'],['C','🚶','Caminhada ou corrida'],['academia','🏋️','Academia'],['futebol','⚽','Futebol'],['bike','🚴','Bike'],['ten','⚡','10 minutos'],['folga','😴','Folga']];
@@ -1284,6 +1305,7 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{go(b.dataset.
  if(tg){try{tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor('#0b0b0d');tg.setBackgroundColor&&tg.setBackgroundColor('#0b0b0d')}catch(_){}}
  S=await store.get();setStatus(CS?'saved':'local');
  if(S&&S.start){S.start=SD;S.join=S.join||today();['log','notes','mood','seen','shown','cards','chal','tuts'].forEach(k=>S[k]=S[k]||{});S.acts=S.acts||[];document.getElementById('app').style.display='block';view=curDay();renderAll();if(S.introSeen!==SEASON.id)maybeIntro();else setTimeout(openTriggers,600)}
+ else if(!(localStorage.getItem('dp_gate')===String(GATE_HASH))){S=null;openGate()}
  else{S=null;document.getElementById('ob').style.display='block';snow(true);document.getElementById('obTrees').innerHTML=[[1,'Dia 1 · brotinho'],[9,'Dia 9 · pinheiro'],[24,'24 dias · estrela']].map(([t,l])=>`<div style="flex:1;text-align:center"><div style="height:120px;display:flex;align-items:flex-end;justify-content:center">${treeSVG({total:t,gifts:0,burnt:0,star:t>=24,streak:1,weeks:[{state:'lit'},{state:'lit'},{state:'lit'},{state:'lit'},{state:t>=24?'lit':'off'}]}).replace('<svg ','<svg style="height:120px;width:auto" ')}</div><div class="muted" style="font-size:11.5px;margin-top:4px">${l}</div></div>`).join('');const u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u&&u.first_name)document.getElementById('obName').value=u.first_name}
 })();
 </script>
