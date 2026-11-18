@@ -663,11 +663,13 @@ async function flushCloud(){if(!CS||!S)return;if(saving){pending=true;return}sav
  saving=false;if(pending){pending=false;flushCloud()}}
 const store={
  async get(){let o=null;
-  if(CS){try{const str=await cloudRead(KEY,validS);if(str)o=parse(str)}catch(_){}}
-  if(!o)o=local();
+  let c=null;if(CS){try{const str=await cloudRead(KEY,validS);if(str)c=parse(str)}catch(_){}}
+  const l=local();
+  /* fica a versão mais nova: se o app fechou antes de terminar de subir, a cópia do aparelho ganha e sobe de novo */
+  if(l&&l.start&&(!c||(l.ts||0)>(c.ts||0))){o=l;if(CS)setTimeout(()=>flushCloud(),800)}else o=c;
   if(CS){try{const ph=await cloudRead(PKEY);if(ph)localStorage.setItem(PKEY,ph)}catch(_){}}
   return o},
- set(o){const str=JSON.stringify(o);
+ set(o){o.ts=Date.now();const str=JSON.stringify(o);
   try{const cur=localStorage.getItem(KEY);if(cur)localStorage.setItem(KEY+'_prev',cur);localStorage.setItem(KEY,str)}catch(_){}
   if(!CS){setStatus('local');return}
   clearTimeout(saveTimer);setStatus('saving');saveTimer=setTimeout(()=>{saveTimer=null;flushCloud()},400);
