@@ -675,7 +675,14 @@ const store={
   clearTimeout(saveTimer);setStatus('saving');saveTimer=setTimeout(()=>{saveTimer=null;flushCloud()},400);
  }
 };
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&saveTimer){clearTimeout(saveTimer);saveTimer=null;flushCloud()}});
+document.addEventListener('visibilitychange',async()=>{
+ if(document.visibilityState==='hidden'&&saveTimer){clearTimeout(saveTimer);saveTimer=null;flushCloud()}
+ /* voltou pra tela: se outro aparelho salvou algo mais novo, puxa antes de mexer */
+ if(document.visibilityState==='visible'&&CS&&S&&!saveTimer&&!saving){try{const str=await cloudRead(KEY,validS);const c=str&&parse(str);
+  if(c&&(c.ts||0)>(S.ts||0)&&!saveTimer&&!saving){S=c;try{localStorage.setItem(KEY,str)}catch(_){}
+   try{const ph=await cloudRead(PKEY);if(ph)localStorage.setItem(PKEY,ph)}catch(_){}
+   view=curDay();renderAll();setStatus('saved')}}catch(_){}}
+});
 function local(){try{const a=parse(localStorage.getItem(KEY));if(a&&a.start)return a;return parse(localStorage.getItem(KEY+'_prev'))}catch(_){return null}}
 function parse(v){try{return v?JSON.parse(v):null}catch(_){return null}}
 
